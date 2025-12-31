@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
 import { getCoinChartData } from '../utils/api'
 
-function PriceChart({ coinId = 'bitcoin', coinName = 'Bitcoin' }) {
+function PriceChart({ coinId = 'bitcoin', coinName = 'Bitcoin', coinSymbol = 'BTC' }) {
   const [chartData, setChartData] = useState([])
   const [timeframe, setTimeframe] = useState(7)
   const [loading, setLoading] = useState(true)
@@ -64,7 +64,9 @@ function PriceChart({ coinId = 'bitcoin', coinName = 'Bitcoin' }) {
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h3 className="text-lg font-semibold text-white">{coinName} Price Chart</h3>
+          <h3 className="text-lg font-semibold text-white">
+            {coinName} ({coinSymbol}) Price Chart
+          </h3>
           <p className="text-slate-400 text-sm">USD Price History</p>
         </div>
 

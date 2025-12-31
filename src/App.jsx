@@ -9,6 +9,7 @@ function App() {
   const [topCoins, setTopCoins] = useState([])
   const [loading, setLoading] = useState(true)
   const [lastUpdated, setLastUpdated] = useState(new Date())
+  const [selectedCoin, setSelectedCoin] = useState({ id: 'bitcoin', name: 'Bitcoin', symbol: 'BTC' })
 
   useEffect(() => {
     fetchDashboardData()
@@ -41,6 +42,14 @@ function App() {
   const handleRefresh = () => {
     setLoading(true)
     fetchDashboardData()
+  }
+
+  const handleCoinSelect = (coin) => {
+    setSelectedCoin({
+      id: coin.id,
+      name: coin.name,
+      symbol: coin.symbol.toUpperCase()
+    })
   }
 
   return (
@@ -116,11 +125,20 @@ function App() {
 
         {/* Price Chart */}
         <div className="mb-8">
-          <PriceChart />
+          <PriceChart
+            coinId={selectedCoin.id}
+            coinName={selectedCoin.name}
+            coinSymbol={selectedCoin.symbol}
+          />
         </div>
 
         {/* Top Cryptocurrencies Table */}
-        <CryptoTable coins={topCoins} loading={loading} />
+        <CryptoTable
+          coins={topCoins}
+          loading={loading}
+          onCoinSelect={handleCoinSelect}
+          selectedCoinId={selectedCoin.id}
+        />
       </main>
 
       {/* Footer */}
