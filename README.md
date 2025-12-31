@@ -8,7 +8,9 @@ A real-time cryptocurrency tracking dashboard with interactive charts, market st
 
 ## ✨ Features
 
-- 📈 **Interactive Price Charts** - View 7-day price history with multiple timeframe options (24H, 7D, 30D, 90D, 1Y)
+- 📈 **Interactive Price Charts** - View price history with multiple timeframe options (24H, 7D, 30D, 90D, 1Y)
+- 🎯 **Clickable Coin Selection** - Click any cryptocurrency to view its detailed price chart
+- 🔄 **Sortable Table Columns** - Sort by price, 24h/7d change, market cap, or volume with visual indicators
 - 💹 **Market Statistics** - Real-time market cap, trading volume, and BTC dominance
 - 🔝 **Top Cryptocurrencies** - Track the top 15 coins by market capitalization
 - 🔄 **Auto-Refresh** - Data automatically updates every 60 seconds
@@ -27,10 +29,11 @@ This project demonstrates:
 - **Data Visualization** - Interactive charts with Recharts library
 - **API Integration** - Real-time data fetching from CoinGecko API
 - **State Management** - React hooks for managing complex application state
+- **Interactive UI** - Sortable tables, clickable rows, dynamic chart updates
+- **Performance Optimization** - useMemo for efficient sorting, Promise.all for parallel API calls
 - **Responsive Design** - Mobile-first approach with TailwindCSS
-- **Performance Optimization** - Efficient data fetching with Promise.all
-- **User Experience** - Loading states, error handling, auto-refresh
-- **Clean Code** - Modular component architecture
+- **User Experience** - Loading states, error handling, auto-refresh, visual feedback
+- **Clean Code** - Modular component architecture with prop-based communication
 
 ## 🛠️ Tech Stack
 
@@ -86,12 +89,19 @@ No environment variables needed - the CoinGecko API is free and requires no auth
 ### Viewing Market Data
 - The dashboard loads automatically with real-time data
 - **KPI Cards** at the top show global market statistics
-- **Price Chart** displays Bitcoin price history
+- **Price Chart** displays Bitcoin price history by default
 - **Crypto Table** shows top 15 cryptocurrencies
+
+### Interactive Features
+- **Click any cryptocurrency row** to view its price chart
+- **Click column headers** to sort the table (price, 24h%, 7d%, market cap, volume)
+- Visual indicators show current sort direction (↑ ascending, ↓ descending)
+- Selected coin is highlighted with blue background
 
 ### Chart Interaction
 - Click timeframe buttons (24H, 7D, 30D, 90D, 1Y) to change the date range
 - Hover over the chart to see exact price at any point
+- Chart title updates to show selected cryptocurrency
 - Chart auto-adjusts for different time ranges
 
 ### Refreshing Data
