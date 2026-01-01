@@ -189,9 +189,9 @@ This project is licensed under the MIT License.
 
 ## 👤 Author
 
-**Federico Pisani**
+**Fredi-Pi**
 - GitHub: [@Fred-Pi](https://github.com/Fred-Pi)
-- Email: mail.fpisani@gmail.com
+  
 
 ## 🙏 Acknowledgments
 
