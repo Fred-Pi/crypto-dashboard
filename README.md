@@ -265,7 +265,7 @@ This project is licensed under the MIT License.
 ## 👤 Author
 
 - GitHub: [@Fred-Pi](https://github.com/Fred-Pi)
-- Portfolio: [Your Portfolio URL]
+
 
 ## 🙏 Acknowledgments
 
