@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
-import { formatNumber, formatPercentage } from '../utils/api'
+import { formatNumber, formatPercentage, getCurrencySymbol } from '../utils/api'
 
-function CryptoTable({ coins, loading, onCoinSelect, selectedCoinId }) {
+function CryptoTable({ coins, loading, onCoinSelect, selectedCoinId, currency = 'usd', favorites = [], onToggleFavorite, onShowDetails }) {
   const [sortConfig, setSortConfig] = useState({ key: 'market_cap_rank', direction: 'asc' })
 
   const handleSort = (key) => {
@@ -49,6 +49,36 @@ function CryptoTable({ coins, loading, onCoinSelect, selectedCoinId }) {
     )
   }
 
+  const handleExportCSV = () => {
+    const headers = ['Rank', 'Name', 'Symbol', `Price (${currency.toUpperCase()})`, '24h %', '7d %', 'Market Cap', 'Volume (24h)']
+
+    const rows = sortedCoins.map((coin, index) => [
+      index + 1,
+      coin.name,
+      coin.symbol.toUpperCase(),
+      coin.current_price,
+      coin.price_change_percentage_24h?.toFixed(2) || '0',
+      coin.price_change_percentage_7d_in_currency?.toFixed(2) || '0',
+      coin.market_cap,
+      coin.total_volume
+    ])
+
+    const csvContent = [
+      headers.join(','),
+      ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+    ].join('\n')
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
+    const link = document.createElement('a')
+    const url = URL.createObjectURL(blob)
+    link.setAttribute('href', url)
+    link.setAttribute('download', `crypto-data-${new Date().toISOString().split('T')[0]}.csv`)
+    link.style.visibility = 'hidden'
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
   if (loading) {
     return (
       <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
@@ -61,15 +91,29 @@ function CryptoTable({ coins, loading, onCoinSelect, selectedCoinId }) {
 
   return (
     <div className="bg-slate-800 border border-slate-700 rounded-lg overflow-hidden">
-      <div className="p-6 border-b border-slate-700">
-        <h3 className="text-lg font-semibold text-white">Top Cryptocurrencies</h3>
-        <p className="text-slate-400 text-sm">By Market Capitalization</p>
+      <div className="p-6 border-b border-slate-700 flex items-center justify-between">
+        <div>
+          <h3 className="text-lg font-semibold text-white">Top Cryptocurrencies</h3>
+          <p className="text-slate-400 text-sm">By Market Capitalization</p>
+        </div>
+        <button
+          onClick={handleExportCSV}
+          className="flex items-center gap-2 px-3 py-1.5 bg-slate-700 hover:bg-slate-600 rounded-md text-white text-sm transition-colors"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+          Export CSV
+        </button>
       </div>
 
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead className="bg-slate-700/50">
             <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider w-12">
+                ★
+              </th>
               <th
                 className="px-6 py-3 text-left text-xs font-medium text-slate-300 uppercase tracking-wider cursor-pointer hover:bg-slate-600/50 transition-colors"
                 onClick={() => handleSort('market_cap_rank')}
@@ -86,7 +130,7 @@ function CryptoTable({ coins, loading, onCoinSelect, selectedCoinId }) {
                 onClick={() => handleSort('current_price')}
               >
                 <div className="flex items-center justify-end">
-                  Price<SortIcon columnKey="current_price" />
+                  Price ({currency.toUpperCase()})<SortIcon columnKey="current_price" />
                 </div>
               </th>
               <th
@@ -139,6 +183,21 @@ function CryptoTable({ coins, loading, onCoinSelect, selectedCoinId }) {
                       : 'hover:bg-slate-700/30'
                   }`}
                 >
+                  <td className="px-6 py-4 whitespace-nowrap text-center">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onToggleFavorite(coin.id)
+                      }}
+                      className={`text-xl transition-colors ${
+                        favorites.includes(coin.id)
+                          ? 'text-yellow-400 hover:text-yellow-300'
+                          : 'text-slate-500 hover:text-yellow-400'
+                      }`}
+                    >
+                      {favorites.includes(coin.id) ? '★' : '☆'}
+                    </button>
+                  </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
                     {index + 1}
                   </td>
@@ -147,7 +206,11 @@ function CryptoTable({ coins, loading, onCoinSelect, selectedCoinId }) {
                       <img
                         src={coin.image}
                         alt={coin.name}
-                        className="w-8 h-8 rounded-full"
+                        className="w-8 h-8 rounded-full cursor-pointer hover:ring-2 hover:ring-blue-500 transition-all"
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          onShowDetails(coin)
+                        }}
                       />
                       <div>
                         <div className="text-sm font-medium text-white">{coin.name}</div>
@@ -156,7 +219,7 @@ function CryptoTable({ coins, loading, onCoinSelect, selectedCoinId }) {
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium text-white">
-                    ${coin.current_price.toLocaleString('en-US', {
+                    {getCurrencySymbol(currency)}{coin.current_price.toLocaleString('en-US', {
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2
                     })}
@@ -168,10 +231,10 @@ function CryptoTable({ coins, loading, onCoinSelect, selectedCoinId }) {
                     {change7d.isPositive ? '↑' : '↓'} {Math.abs(change7d.value)}%
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-slate-300">
-                    {formatNumber(coin.market_cap)}
+                    {formatNumber(coin.market_cap, currency)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-slate-300">
-                    {formatNumber(coin.total_volume)}
+                    {formatNumber(coin.total_volume, currency)}
                   </td>
                 </tr>
               )

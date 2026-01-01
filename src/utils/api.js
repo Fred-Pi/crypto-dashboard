@@ -8,6 +8,24 @@ const api = axios.create({
   timeout: 10000,
 })
 
+// Supported currencies
+export const SUPPORTED_CURRENCIES = {
+  usd: { symbol: '$', name: 'US Dollar' },
+  eur: { symbol: '€', name: 'Euro' },
+  gbp: { symbol: '£', name: 'British Pound' },
+  jpy: { symbol: '¥', name: 'Japanese Yen' },
+  cad: { symbol: 'C$', name: 'Canadian Dollar' },
+  aud: { symbol: 'A$', name: 'Australian Dollar' }
+}
+
+/**
+ * Get currency symbol for display
+ * @param {string} currency - Currency code (e.g., 'usd')
+ */
+export function getCurrencySymbol(currency) {
+  return SUPPORTED_CURRENCIES[currency]?.symbol || '$'
+}
+
 /**
  * Get global market data
  * Returns total market cap, volume, BTC dominance, etc.
@@ -25,12 +43,13 @@ export async function getGlobalMarketData() {
 /**
  * Get top cryptocurrencies by market cap
  * @param {number} limit - Number of coins to fetch (default 10)
+ * @param {string} currency - Currency code (default 'usd')
  */
-export async function getTopCoins(limit = 10) {
+export async function getTopCoins(limit = 10, currency = 'usd') {
   try {
     const response = await api.get('/coins/markets', {
       params: {
-        vs_currency: 'usd',
+        vs_currency: currency,
         order: 'market_cap_desc',
         per_page: limit,
         page: 1,
@@ -62,12 +81,13 @@ export async function getTrendingCoins() {
  * Get price chart data for a specific coin
  * @param {string} coinId - Coin ID (e.g., 'bitcoin')
  * @param {number} days - Number of days (1, 7, 30, 90, 365)
+ * @param {string} currency - Currency code (default 'usd')
  */
-export async function getCoinChartData(coinId, days = 7) {
+export async function getCoinChartData(coinId, days = 7, currency = 'usd') {
   try {
     const response = await api.get(`/coins/${coinId}/market_chart`, {
       params: {
-        vs_currency: 'usd',
+        vs_currency: currency,
         days: days,
         interval: days === 1 ? 'hourly' : 'daily'
       }
@@ -81,13 +101,16 @@ export async function getCoinChartData(coinId, days = 7) {
 
 /**
  * Format large numbers with K, M, B suffixes
+ * @param {number} num - Number to format
+ * @param {string} currency - Currency code (default 'usd')
  */
-export function formatNumber(num) {
-  if (num >= 1e12) return `$${(num / 1e12).toFixed(2)}T`
-  if (num >= 1e9) return `$${(num / 1e9).toFixed(2)}B`
-  if (num >= 1e6) return `$${(num / 1e6).toFixed(2)}M`
-  if (num >= 1e3) return `$${(num / 1e3).toFixed(2)}K`
-  return `$${num.toFixed(2)}`
+export function formatNumber(num, currency = 'usd') {
+  const symbol = getCurrencySymbol(currency)
+  if (num >= 1e12) return `${symbol}${(num / 1e12).toFixed(2)}T`
+  if (num >= 1e9) return `${symbol}${(num / 1e9).toFixed(2)}B`
+  if (num >= 1e6) return `${symbol}${(num / 1e6).toFixed(2)}M`
+  if (num >= 1e3) return `${symbol}${(num / 1e3).toFixed(2)}K`
+  return `${symbol}${num.toFixed(2)}`
 }
 
 /**
@@ -99,5 +122,28 @@ export function formatPercentage(percent) {
     value: formatted,
     isPositive: percent >= 0,
     color: percent >= 0 ? 'text-green-500' : 'text-red-500'
+  }
+}
+
+/**
+ * Get detailed information for a specific coin
+ * @param {string} coinId - Coin ID (e.g., 'bitcoin')
+ */
+export async function getCoinDetails(coinId) {
+  try {
+    const response = await api.get(`/coins/${coinId}`, {
+      params: {
+        localization: false,
+        tickers: false,
+        market_data: true,
+        community_data: true,
+        developer_data: false,
+        sparkline: true
+      }
+    })
+    return response.data
+  } catch (error) {
+    console.error(`Error fetching details for ${coinId}:`, error)
+    throw error
   }
 }

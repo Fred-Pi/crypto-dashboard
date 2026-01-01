@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from 'recharts'
-import { getCoinChartData } from '../utils/api'
+import { getCoinChartData, getCurrencySymbol } from '../utils/api'
 
-function PriceChart({ coinId = 'bitcoin', coinName = 'Bitcoin', coinSymbol = 'BTC' }) {
+function PriceChart({ coinId = 'bitcoin', coinName = 'Bitcoin', coinSymbol = 'BTC', currency = 'usd' }) {
   const [chartData, setChartData] = useState([])
   const [timeframe, setTimeframe] = useState(7)
   const [loading, setLoading] = useState(true)
@@ -14,7 +14,7 @@ function PriceChart({ coinId = 'bitcoin', coinName = 'Bitcoin', coinSymbol = 'BT
   const fetchChartData = async () => {
     setLoading(true)
     try {
-      const data = await getCoinChartData(coinId, timeframe)
+      const data = await getCoinChartData(coinId, timeframe, currency)
 
       // Transform data for Recharts
       const formattedData = data.prices.map(([timestamp, price]) => ({
@@ -48,7 +48,7 @@ function PriceChart({ coinId = 'bitcoin', coinName = 'Bitcoin', coinSymbol = 'BT
         <div className="bg-slate-800 border border-slate-600 rounded-lg p-3 shadow-lg">
           <p className="text-slate-300 text-sm">{payload[0].payload.time}</p>
           <p className="text-white font-bold">
-            ${payload[0].value.toLocaleString('en-US', {
+            {getCurrencySymbol(currency)}{payload[0].value.toLocaleString('en-US', {
               minimumFractionDigits: 2,
               maximumFractionDigits: 2
             })}
@@ -67,7 +67,7 @@ function PriceChart({ coinId = 'bitcoin', coinName = 'Bitcoin', coinSymbol = 'BT
           <h3 className="text-lg font-semibold text-white">
             {coinName} ({coinSymbol}) Price Chart
           </h3>
-          <p className="text-slate-400 text-sm">USD Price History</p>
+          <p className="text-slate-400 text-sm">{getCurrencySymbol(currency)} Price History</p>
         </div>
 
         {/* Timeframe selector */}
@@ -105,7 +105,7 @@ function PriceChart({ coinId = 'bitcoin', coinName = 'Bitcoin', coinSymbol = 'BT
             <YAxis
               stroke="#64748b"
               tick={{ fill: '#94a3b8', fontSize: 12 }}
-              tickFormatter={(value) => `$${value.toLocaleString()}`}
+              tickFormatter={(value) => `${getCurrencySymbol(currency)}${value.toLocaleString()}`}
             />
             <Tooltip content={<CustomTooltip />} />
             <Line

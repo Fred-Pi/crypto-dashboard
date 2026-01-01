@@ -1,6 +1,6 @@
 import { formatNumber, formatPercentage } from '../utils/api'
 
-function StatCard({ title, value, change, icon }) {
+function StatCard({ title, value, change, icon, currency = 'usd' }) {
   const percentageData = change !== undefined ? formatPercentage(change) : null
 
   return (
@@ -9,7 +9,7 @@ function StatCard({ title, value, change, icon }) {
         <div className="flex-1">
           <p className="text-slate-400 text-sm font-medium mb-2">{title}</p>
           <p className="text-2xl font-bold text-white mb-1">
-            {typeof value === 'number' ? formatNumber(value) : value}
+            {typeof value === 'number' ? formatNumber(value, currency) : value}
           </p>
           {percentageData && (
             <div className="flex items-center gap-1">
