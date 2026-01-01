@@ -8,8 +8,13 @@ A real-time cryptocurrency tracking dashboard with interactive charts, market st
 
 ## ✨ Features
 
+- 💱 **Multi-Currency Support** - Switch between USD, EUR, GBP, JPY, CAD, AUD with real-time conversion
+- 🔍 **Search & Filter** - Real-time search by coin name or symbol with instant results
+- ⭐ **Favorites/Watchlist** - Star coins to save favorites, persisted across sessions
+- 📋 **Detailed Coin Modal** - Click coin logos to view comprehensive market statistics and links
+- 📊 **CSV Export** - Download current table view as CSV with date-stamped filename
 - 📈 **Interactive Price Charts** - View price history with multiple timeframe options (24H, 7D, 30D, 90D, 1Y)
-- 🎯 **Clickable Coin Selection** - Click any cryptocurrency to view its detailed price chart
+- 🎯 **Clickable Coin Selection** - Click any cryptocurrency row to view its detailed price chart
 - 🔄 **Sortable Table Columns** - Sort by price, 24h/7d change, market cap, or volume with visual indicators
 - 💹 **Market Statistics** - Real-time market cap, trading volume, and BTC dominance
 - 🔝 **Top Cryptocurrencies** - Track the top 15 coins by market capitalization
@@ -27,12 +32,14 @@ A real-time cryptocurrency tracking dashboard with interactive charts, market st
 
 This project demonstrates:
 - **Data Visualization** - Interactive charts with Recharts library
-- **API Integration** - Real-time data fetching from CoinGecko API
+- **API Integration** - Real-time data fetching from CoinGecko API with multi-currency support
 - **State Management** - React hooks for managing complex application state
-- **Interactive UI** - Sortable tables, clickable rows, dynamic chart updates
+- **Data Persistence** - localStorage for favorites and currency preferences
+- **Interactive UI** - Sortable tables, clickable rows, dynamic chart updates, modal dialogs
 - **Performance Optimization** - useMemo for efficient sorting, Promise.all for parallel API calls
+- **Advanced Features** - Search filtering, CSV export, favorites system
 - **Responsive Design** - Mobile-first approach with TailwindCSS
-- **User Experience** - Loading states, error handling, auto-refresh, visual feedback
+- **User Experience** - Loading states, error handling, auto-refresh, visual feedback, keyboard navigation
 - **Clean Code** - Modular component architecture with prop-based communication
 
 ## 🛠️ Tech Stack
@@ -93,8 +100,14 @@ No environment variables needed - the CoinGecko API is free and requires no auth
 - **Crypto Table** shows top 15 cryptocurrencies
 
 ### Interactive Features
-- **Click any cryptocurrency row** to view its price chart
+- **Currency Selector** - Choose from USD, EUR, GBP, JPY, CAD, or AUD in the header
+- **Search Bar** - Type to filter coins by name or symbol (e.g., "bitcoin" or "btc")
+- **Favorites** - Click star icons (★/☆) to add/remove favorites
+- **Filter Toggle** - Switch between "All Coins" and "Favorites" view
+- **Click cryptocurrency rows** to view their price chart
+- **Click coin logos** to open detailed modal with market stats and links
 - **Click column headers** to sort the table (price, 24h%, 7d%, market cap, volume)
+- **Export CSV** - Download current filtered/sorted view
 - Visual indicators show current sort direction (↑ ascending, ↓ descending)
 - Selected coin is highlighted with blue background
 
@@ -117,9 +130,10 @@ dashboard/
 │   ├── components/
 │   │   ├── StatCard.jsx          # KPI card component
 │   │   ├── PriceChart.jsx         # Interactive price chart with Recharts
-│   │   └── CryptoTable.jsx        # Cryptocurrency table
+│   │   ├── CryptoTable.jsx        # Cryptocurrency table with sorting
+│   │   └── CoinDetailModal.jsx    # Detailed coin information modal
 │   ├── utils/
-│   │   └── api.js                 # CoinGecko API utilities
+│   │   └── api.js                 # CoinGecko API utilities & multi-currency support
 │   ├── App.jsx                    # Main application component
 │   ├── main.jsx                   # Application entry point
 │   └── index.css                  # Global styles and Tailwind imports
@@ -159,8 +173,48 @@ Built with Recharts for responsive, customizable visualizations:
 </ResponsiveContainer>
 ```
 
+### Multi-Currency Support
+API integration with dynamic currency parameter:
+```javascript
+// Fetch data in selected currency
+const coins = await getTopCoins(15, currency) // e.g., 'eur'
+const chartData = await getCoinChartData('bitcoin', 7, currency)
+
+// Display with correct currency symbol
+{getCurrencySymbol(currency)}{price.toLocaleString()}
+```
+
+### Favorites with localStorage
+Persistent favorites across sessions:
+```javascript
+const [favorites, setFavorites] = useState(() => {
+  const saved = localStorage.getItem('crypto-favorites')
+  return saved ? JSON.parse(saved) : []
+})
+
+// Automatically sync to localStorage
+useEffect(() => {
+  localStorage.setItem('crypto-favorites', JSON.stringify(favorites))
+}, [favorites])
+```
+
+### CSV Export
+Export current view to downloadable CSV:
+```javascript
+const handleExportCSV = () => {
+  const csvContent = [
+    headers.join(','),
+    ...rows.map(row => row.map(cell => `"${cell}"`).join(','))
+  ].join('\n')
+
+  const blob = new Blob([csvContent], { type: 'text/csv' })
+  // Trigger download with date-stamped filename
+}
+```
+
 ## 🧪 Testing Checklist
 
+### Core Features
 - [ ] Dashboard loads with market data
 - [ ] KPI cards display correct values
 - [ ] Price chart renders with Bitcoin data
@@ -169,8 +223,29 @@ Built with Recharts for responsive, customizable visualizations:
 - [ ] Hover tooltips work on chart
 - [ ] Refresh button updates data
 - [ ] Auto-refresh works (wait 60 seconds)
+
+### New Features
+- [ ] Currency selector changes all prices and symbols
+- [ ] Currency preference persists on page reload
+- [ ] Search bar filters coins by name and symbol
+- [ ] Clear button (X) resets search
+- [ ] Star icons toggle favorites on/off
+- [ ] Favorites persist on page reload
+- [ ] "All Coins" / "Favorites" toggle works
+- [ ] Click coin logo opens detail modal
+- [ ] Modal shows comprehensive coin data
+- [ ] Modal closes with ESC, backdrop click, or X button
+- [ ] Export CSV downloads file with current view
+- [ ] CSV filename includes current date
+- [ ] Sorting works with search and favorites filters
+- [ ] Click coin row updates price chart
+
+### Responsive Design
 - [ ] Test on mobile device
+- [ ] Test on tablet device
 - [ ] Test on different screen sizes
+- [ ] Search bar responsive on small screens
+- [ ] Modal responsive and scrollable
 
 ## 📈 Performance
 
@@ -189,9 +264,8 @@ This project is licensed under the MIT License.
 
 ## 👤 Author
 
-**Fredi-Pi**
 - GitHub: [@Fred-Pi](https://github.com/Fred-Pi)
-  
+- Portfolio: [Your Portfolio URL]
 
 ## 🙏 Acknowledgments
 
